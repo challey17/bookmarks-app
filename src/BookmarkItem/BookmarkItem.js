@@ -3,6 +3,7 @@ import Rating from "../Rating/Rating";
 import BookmarksContext from "../BookmarksContext";
 import config from "../config";
 import "./BookmarkItem.css";
+import PropTypes from "prop-types";
 
 function deleteBookmarkRequest(bookmarkId, cb) {
   fetch(config.API_ENDPOINT + `/${bookmarkId}`, {
@@ -42,7 +43,7 @@ export default function BookmarkItem(props) {
                 {props.title}
               </a>
             </h3>
-            <Rating value={props.rating} />
+            <Rating value={props.rating} /> />
           </div>
           <p className="BookmarkItem__description">{props.description}</p>
           <div className="BookmarkItem__buttons">
@@ -60,7 +61,33 @@ export default function BookmarkItem(props) {
     </BookmarksContext.Consumer>
   );
 }
+BookmarkItem.propTypes = {
+  title: PropTypes.string.isRequired,
+  url: (props, propName, componentName) => {
+    // get the value of prop
+    const prop = props[propName];
+
+    // do the isRequired check
+    if (!prop) {
+      return new Error(
+        `${propName} is required in ${componentName}. Validation Failed`
+      );
+    }
+
+    // do the custom check here
+    // using a simple regex
+    if (prop.length < 5 || !prop.match(new RegExp(/^https?:\/\//))) {
+      return new Error(
+        `Invalid prop, ${propName} must be min length 5 and begin http(s)://. Validation Failed.`
+      );
+    }
+  },
+  rating: PropTypes.number,
+  description: PropTypes.string,
+};
 
 BookmarkItem.defaultProps = {
   onClickDelete: () => {},
+  rating: 1,
+  description: "",
 };
